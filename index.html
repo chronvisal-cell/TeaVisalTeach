@@ -54,34 +54,52 @@
   </script>
 
   <style>
-    /* Custom Scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(241, 245, 249, 0.6); }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .katex-display { margin: 0.5em 0 !important; overflow-x: auto; overflow-y: hidden; }
 
-    /* Floating Math Symbols Animation */
     @keyframes floatParticle {
-      0% { transform: translateY(0) rotate(0deg); opacity: 0.25; }
-      50% { transform: translateY(-18px) rotate(8deg); opacity: 0.65; }
-      100% { transform: translateY(0) rotate(0deg); opacity: 0.25; }
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
+      50% { transform: translateY(-16px) rotate(6deg); opacity: 0.5; }
+      100% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
     }
     .math-symbol-particle {
       position: absolute;
-      animation: floatParticle 6s ease-in-out infinite;
+      animation: floatParticle 7s ease-in-out infinite;
       user-select: none;
       pointer-events: none;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #certificate-printable-area, #certificate-printable-area * {
+        visibility: visible;
+      }
+      #certificate-printable-area {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 2rem;
+        background: white !important;
+        border: 4px double #d97706 !important;
+      }
     }
   </style>
 </head>
 
 <body class="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
-  <!-- Toast Notification Container -->
+  <!-- Toast Notification System -->
   <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Header Navigation -->
+  <!-- Main Navbar -->
   <header class="bg-indigo-950 text-white shadow-lg sticky top-0 z-40 border-b border-indigo-900/60 backdrop-blur-md bg-opacity-95">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap justify-between items-center gap-3">
       
@@ -94,7 +112,7 @@
           <div class="flex items-center gap-2">
             <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
               MathStudio Pro
-              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/30 text-indigo-200 border border-indigo-400/20">LMS</span>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/30 text-indigo-200 border border-indigo-400/20">LMS 2026</span>
             </h1>
           </div>
           <p class="text-[11px] text-indigo-300 font-medium hidden sm:block">វេទិកាគណិតវិទ្យាគ្រប់កម្រិត & ប្រព័ន្ធគ្រប់គ្រងការសិក្សា</p>
@@ -112,8 +130,9 @@
         <button onclick="switchTab('sandbox')" id="nav-sandbox" class="px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-200 hover:bg-indigo-900/80 hover:text-white transition">
           <i class="fa-solid fa-chart-line mr-1"></i> ពិសោធន៍ក្រាហ្វិក
         </button>
-        <button onclick="switchTab('studio')" id="nav-studio" class="px-3 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition hidden">
+        <button onclick="switchTab('studio')" id="nav-studio" class="px-3 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:bg-amber-500/20 transition hidden items-center gap-1">
           <i class="fa-solid fa-sliders mr-1"></i> Studio (Admin)
+          <span id="nav-studio-student-badge" class="ml-1 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black hidden">0</span>
         </button>
 
         <!-- Official Telegram Button -->
@@ -123,7 +142,7 @@
           <span>@TVISALCHRUN</span>
         </a>
 
-        <!-- Sound Toggle Button -->
+        <!-- Sound FX Toggle -->
         <button id="btn-sound-toggle" onclick="toggleAudioMute()" title="បិទ/បើកសំឡេង" class="w-8 h-8 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-indigo-200 hover:text-white flex items-center justify-center text-xs transition border border-indigo-700/50">
           <i class="fa-solid fa-volume-high" id="sound-icon"></i>
         </button>
@@ -149,7 +168,7 @@
               <i class="fa-solid fa-trophy text-amber-400"></i>
               <span id="nav-user-trophy-count">0 ពាន</span>
             </button>
-            <span id="nav-username-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-800 text-indigo-200 max-w-[100px] truncate">សិស្ស</span>
+            <span id="nav-username-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-800 text-indigo-200 max-w-[110px] truncate">សិស្ស</span>
             <button onclick="handleUserLogout()" title="ចាកចេញ" class="w-7 h-7 rounded-xl bg-rose-600/80 hover:bg-rose-500 text-white flex items-center justify-center text-xs transition">
               <i class="fa-solid fa-arrow-right-from-bracket"></i>
             </button>
@@ -173,15 +192,15 @@
     </div>
   </header>
 
+  <!-- Main View Container -->
   <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
 
     <!-- 1. DASHBOARD TAB -->
     <section id="tab-dashboard" class="space-y-6">
-
+      
       <!-- Hero Banner -->
       <div class="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-950/10">
         
-        <!-- Floating Math Particles -->
         <span class="math-symbol-particle text-3xl font-mono text-indigo-400/40 top-4 left-10">$$\int$$</span>
         <span class="math-symbol-particle text-2xl font-mono text-amber-300/40 bottom-6 right-16" style="animation-delay: 2s;">$$\sum_{n=1}^{\infty}$$</span>
         <span class="math-symbol-particle text-3xl font-mono text-cyan-300/40 top-8 right-1/4" style="animation-delay: 3.5s;">$$\pi$$</span>
@@ -193,7 +212,7 @@
               <i class="fa-solid fa-sparkles text-amber-300"></i> វេទិកាគណិតវិទ្យាជំនាន់ថ្មី ២០២៦
             </span>
             <span id="cloud-sync-status" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Auto-Persist: Protected
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Auto-Persist: Safe Mode
             </span>
           </div>
 
@@ -230,11 +249,18 @@
           <p class="text-xs text-slate-500">ជ្រើសរើសកម្រិតសិក្សាដែលត្រូវនឹងសមត្ថភាពរបស់អ្នក</p>
         </div>
 
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
-          <button onclick="filterCoursesDashboard('ALL')" id="filter-dash-all" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition">ទាំងអស់</button>
-          <button onclick="filterCoursesDashboard('PRIMARY')" id="filter-dash-primary" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-indigo-50 text-slate-700 border border-slate-200 transition">បឋមសិក្សា</button>
-          <button onclick="filterCoursesDashboard('MIDDLE')" id="filter-dash-middle" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-indigo-50 text-slate-700 border border-slate-200 transition">អនុវិទ្យាល័យ</button>
-          <button onclick="filterCoursesDashboard('HIGH')" id="filter-dash-high" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-indigo-50 text-slate-700 border border-slate-200 transition">វិទ្យាល័យ</button>
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Admin Create Course Button on Dashboard -->
+          <button id="dash-create-course-btn" onclick="openNewCourseModal()" class="hidden px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> ➕ បង្កើតវគ្គថ្មី
+          </button>
+
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <button onclick="filterCoursesDashboard('ALL')" id="filter-dash-all" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition">ទាំងអស់</button>
+            <button onclick="filterCoursesDashboard('PRIMARY')" id="filter-dash-primary" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-indigo-50 text-slate-700 border border-slate-200 transition">បឋមសិក្សា</button>
+            <button onclick="filterCoursesDashboard('MIDDLE')" id="filter-dash-middle" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-indigo-50 text-slate-700 border border-slate-200 transition">អនុវិទ្យាល័យ</button>
+            <button onclick="filterCoursesDashboard('HIGH')" id="filter-dash-high" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-indigo-50 text-slate-700 border border-slate-200 transition">វិទ្យាល័យ</button>
+          </div>
         </div>
       </div>
 
@@ -450,7 +476,7 @@
             <span class="px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 text-xs font-bold uppercase">Dynamic Math Engine</span>
           </div>
           <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">📊 បន្ទប់ពិសោធន៍ក្រាហ្វិកគណិតវិទ្យាអន្តរកម្ម</h2>
-          <p class="text-xs text-slate-500">ផ្លាស់ប្ដូរប៉ារ៉ាម៉ែត្រ $a, b, c$ ដើម្បីមើលចលនាប៉ារ៉ាបូល $y = ax^2 + bx + c$ និងចំណុចកំពូល Vertex ភ្លាមៗ</p>
+          <p class="text-xs text-slate-500">ផ្លាស់ប្ដូរប៉ារ៉ាម៉ែត្រ $a, b, c$ ដើម្បីមើលចលនាប៉ារ៉ាបូល $y = ax^2 + bx + c$, ចំណុចកំពូល Vertex និងឫសនៃសមីការភ្លាមៗ</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -472,29 +498,34 @@
                   <span>មេគុណ a:</span>
                   <span id="graph-val-a" class="font-mono text-indigo-600 font-extrabold">1.0</span>
                 </div>
-                <input type="range" id="graph-range-a" min="-4" max="4" step="0.2" value="1" class="w-full accent-indigo-600 cursor-pointer" oninput="renderMathGraph()">
+                <input type="range" id="graph-range-a" min="-4" max="4" step="0.1" value="1" class="w-full accent-indigo-600 cursor-pointer" oninput="renderMathGraph()">
               </div>
               <div>
                 <div class="flex justify-between font-bold text-slate-700 mb-1">
                   <span>មេគុណ b:</span>
                   <span id="graph-val-b" class="font-mono text-indigo-600 font-extrabold">0.0</span>
                 </div>
-                <input type="range" id="graph-range-b" min="-8" max="8" step="0.5" value="0" class="w-full accent-indigo-600 cursor-pointer" oninput="renderMathGraph()">
+                <input type="range" id="graph-range-b" min="-8" max="8" step="0.2" value="0" class="w-full accent-indigo-600 cursor-pointer" oninput="renderMathGraph()">
               </div>
               <div>
                 <div class="flex justify-between font-bold text-slate-700 mb-1">
                   <span>មេគុណ c:</span>
                   <span id="graph-val-c" class="font-mono text-indigo-600 font-extrabold">0.0</span>
                 </div>
-                <input type="range" id="graph-range-c" min="-8" max="8" step="0.5" value="0" class="w-full accent-indigo-600 cursor-pointer" oninput="renderMathGraph()">
+                <input type="range" id="graph-range-c" min="-8" max="8" step="0.2" value="0" class="w-full accent-indigo-600 cursor-pointer" oninput="renderMathGraph()">
               </div>
             </div>
 
-            <!-- Vertex Calculation Card -->
-            <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1.5 text-xs">
-              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">ចំណុចកំពូល (Vertex):</span>
-              <div id="graph-vertex-display" class="font-mono font-bold text-indigo-700 text-sm">V(0.00, 0.00)</div>
-              <p class="text-[10px] text-slate-400">រូបមន្ត៖ $x_v = -\frac{b}{2a}$, $y_v = f(x_v)$</p>
+            <!-- Vertex & Analysis Card -->
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2 text-xs">
+              <div>
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">ចំណុចកំពូល (Vertex):</span>
+                <div id="graph-vertex-display" class="font-mono font-bold text-indigo-700 text-sm">V(0.00, 0.00)</div>
+              </div>
+              <div class="pt-1.5 border-t border-slate-100">
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">ឌីសគ្រីមីណង់ & ឫស ($\Delta = b^2 - 4ac$):</span>
+                <div id="graph-roots-display" class="font-mono font-semibold text-slate-700 text-xs">$\Delta = 0$, $x_1 = x_2 = 0$</div>
+              </div>
             </div>
 
             <button onclick="resetGraphParams()" class="w-full py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition">
@@ -504,7 +535,7 @@
 
           <!-- Interactive Canvas Viewport -->
           <div class="lg:col-span-2 bg-slate-950 rounded-3xl p-4 flex flex-col items-center justify-center relative min-h-[380px] shadow-inner overflow-hidden">
-            <canvas id="mathCanvas" class="w-full h-full rounded-2xl bg-slate-950"></canvas>
+            <canvas id="mathCanvas" class="w-full h-full rounded-2xl bg-slate-950 block"></canvas>
             <div class="absolute bottom-3 left-4 text-[10px] text-slate-400 font-mono bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-800 pointer-events-none">
               <span id="canvas-mouse-coords">Mouse: (x: 0.0, y: 0.0)</span>
             </div>
@@ -524,10 +555,14 @@
               <span class="px-2.5 py-0.5 rounded-md bg-amber-400/20 text-amber-800 text-xs font-bold border border-amber-400/30 uppercase">Admin Studio</span>
             </div>
             <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">🛠️ Course Studio & ប្រព័ន្ធគ្រប់គ្រង</h2>
-            <p class="text-xs text-slate-500">កំណត់តម្លៃវគ្គសិក្សា បង្កើត Passcode ម្ដងប្រើបានម្ដងគត់ និងកែសម្រួលរូបមន្តមេរៀន</p>
+            <p class="text-xs text-slate-500">បង្កើតវគ្គសិក្សាថ្មី កំណត់តម្លៃវគ្គ បង្កើត Passcode និងពិនិត្យមើលបញ្ជីឈ្មោះសិស្សចុះឈ្មោះជាមួយ Gmail</p>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openNewCourseModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-plus-circle text-sm"></i>
+              <span>➕ បង្កើតវគ្គសិក្សាថ្មី</span>
+            </button>
             <button onclick="openCloudConfigModal()" class="px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-bold transition flex items-center gap-1.5">
               <i class="fa-solid fa-cloud"></i>
               <span>Cloud Sync</span>
@@ -539,16 +574,68 @@
           </div>
         </div>
 
+        <!-- Registered Students & Gmail Notifications Directory -->
+        <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 sm:p-6 text-white space-y-5 border border-indigo-800/80 shadow-lg">
+          <div class="flex flex-wrap justify-between items-center gap-3 border-b border-indigo-800/70 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-md bg-rose-500/20 text-rose-300 text-[11px] font-bold border border-rose-400/30 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span> ជូនដំណឹងមកលោកគ្រូ វិសាល
+                </span>
+                <span id="studio-total-students-badge" class="px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-400/30">
+                  សិស្សសរុប៖ 0 នាក់
+                </span>
+              </div>
+              <h3 class="text-base sm:text-lg font-extrabold mt-1 text-white flex items-center gap-2">
+                <i class="fa-solid fa-users text-amber-400"></i> បញ្ជីសិស្សបានចុះឈ្មោះ & គណនី Gmail ផ្លូវការ
+              </h3>
+              <p class="text-xs text-indigo-200">ទិន្នន័យដែលសិស្សបានបំពេញពេលចុះឈ្មោះ នឹងត្រូវ sync និងបង្ហាញជូនលោកគ្រូនៅទីនេះភ្លាមៗ</p>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="relative">
+                <input type="text" id="admin-search-student-input" oninput="filterAdminStudentsList()" placeholder="ស្វែងរកតាមឈ្មោះ ឬ Gmail..." class="text-xs px-3 py-2 pl-8 rounded-xl bg-indigo-950/90 border border-indigo-700 text-white placeholder-indigo-300/60 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 w-52 sm:w-64">
+                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-xs text-indigo-300"></i>
+              </div>
+              <button onclick="exportStudentsToCSV()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-file-csv text-sm"></i> Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Students Table List -->
+          <div class="overflow-x-auto rounded-2xl border border-indigo-800/60 bg-indigo-950/40">
+            <table class="w-full text-left text-xs text-indigo-100">
+              <thead class="bg-indigo-900/60 text-indigo-200 uppercase text-[10px] tracking-wider border-b border-indigo-800">
+                <tr>
+                  <th class="py-3 px-4">ឈ្មោះសិស្ស</th>
+                  <th class="py-3 px-4">គណនី Gmail</th>
+                  <th class="py-3 px-4">ទូរស័ព្ទ / Telegram</th>
+                  <th class="py-3 px-4">កម្រិតសិក្សា</th>
+                  <th class="py-3 px-4">កាលបរិច្ឆេទចុះឈ្មោះ</th>
+                  <th class="py-3 px-4 text-center">សកម្មភាព</th>
+                </tr>
+              </thead>
+              <tbody id="admin-students-table-body" class="divide-y divide-indigo-800/40 font-medium">
+                <!-- Dynamically Rendered Registered Students -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           <!-- Course Selector & Passcode Manager -->
           <div class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">ជ្រើសរើសវគ្គសិក្សាដើម្បីកែប្រែ៖</label>
-              <select id="studio-course-select" onchange="onStudioCourseChange()" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold">
-                <!-- Course Options -->
-              </select>
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-slate-700">ជ្រើសរើសវគ្គសិក្សាដើម្បីកែប្រែ៖</label>
+              <button onclick="openNewCourseModal()" class="text-[11px] font-bold text-emerald-700 hover:underline flex items-center gap-1">
+                <i class="fa-solid fa-plus"></i> បង្កើតថ្មី
+              </button>
             </div>
+            <select id="studio-course-select" onchange="onStudioCourseChange()" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold">
+              <!-- Course Options -->
+            </select>
 
             <!-- Price Editor Box -->
             <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl space-y-2">
@@ -589,6 +676,23 @@
 
           <!-- Lesson Content Editor -->
           <div class="lg:col-span-2 space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex-grow">
+                <label class="block text-xs font-bold text-slate-700 mb-1">ជ្រើសរើសមេរៀនក្នុងវគ្គ៖</label>
+                <select id="studio-lesson-select" onchange="onStudioLessonSelectChange()" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl bg-white font-bold">
+                  <!-- Injected Lesson Options -->
+                </select>
+              </div>
+              <div class="pt-5 flex items-center gap-1.5">
+                <button onclick="addNewLessonToCurrentCourse()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1">
+                  <i class="fa-solid fa-plus"></i> បន្ថែមមេរៀនថ្មី
+                </button>
+                <button onclick="deleteCurrentStudioLesson()" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition flex items-center gap-1" title="លុបមេរៀននេះ">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">ចំណងជើងមេរៀន៖</label>
               <input type="text" id="studio-lesson-title-input" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-xl bg-white font-bold">
@@ -602,7 +706,8 @@
                 <button onclick="insertStudioFormula('\\sqrt{x}')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 text-indigo-800 rounded font-mono text-xs font-bold">\sqrt{x}</button>
                 <button onclick="insertStudioFormula('\\int_{a}^{b} f(x)dx')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 text-indigo-800 rounded font-mono text-xs font-bold">\int</button>
                 <button onclick="insertStudioFormula('\\lim_{x \\to 0} f(x)')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 text-indigo-800 rounded font-mono text-xs font-bold">\lim</button>
-                <button onclick="insertStudioFormula('\\sum_{i=1}^{n} i')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 text-indigo-800 rounded font-mono text-xs font-bold">\sum</button>
+                <button onclick="insertStudioFormula('\\sum_{i=1}^{n} a_i')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 text-indigo-800 rounded font-mono text-xs font-bold">\sum</button>
+                <button onclick="insertStudioFormula('\\vec{u} \\cdot \\vec{v}')" class="px-2 py-1 bg-slate-100 hover:bg-indigo-50 text-indigo-800 rounded font-mono text-xs font-bold">\vec{u}</button>
               </div>
             </div>
 
@@ -649,12 +754,11 @@
     </p>
   </footer>
 
+  <!-- MODALS SECTION -->
   
-  <!-- 1. COURSE BENEFITS MODAL (COMPACT & BEAUTIFUL) -->
+  <!-- 1. COURSE BENEFITS MODAL -->
   <div id="modal-benefits" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-3xl p-5 max-w-md w-full shadow-2xl space-y-4 max-h-[92vh] flex flex-col border border-slate-100">
-      
-      <!-- Modal Header -->
       <div class="flex justify-between items-start border-b border-slate-100 pb-3">
         <div>
           <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">Exclusive Privileges</span>
@@ -666,62 +770,44 @@
         <button onclick="closeCourseBenefitsModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-xs transition">✕</button>
       </div>
 
-      <!-- 5 Core Benefits List (Compact) -->
       <div class="space-y-2.5 overflow-y-auto pr-1 flex-grow text-xs">
-        
         <div class="p-2.5 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-start gap-2.5">
-          <div class="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
-            <i class="fa-solid fa-circle-play"></i>
-          </div>
+          <div class="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm"><i class="fa-solid fa-circle-play"></i></div>
           <div>
             <h4 class="font-bold text-slate-900 text-xs">វីដេអូងាយយល់ និង ឥតដែនកំណត់ស្របតាមកម្មវិធីសិក្សា</h4>
             <p class="text-[11px] text-slate-600">រៀនគ្រប់ពេលវេលា មើលសារឡើងវិញមិនកំណត់ ងាយយល់ និងចំគោលដៅមេរៀននីមួយៗ។</p>
           </div>
         </div>
-
         <div class="p-2.5 rounded-2xl bg-rose-50/70 border border-rose-100 flex items-start gap-2.5">
-          <div class="w-7 h-7 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
-            <i class="fa-solid fa-file-pdf"></i>
-          </div>
+          <div class="w-7 h-7 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm"><i class="fa-solid fa-file-pdf"></i></div>
           <div>
             <h4 class="font-bold text-slate-900 text-xs">ឯកសារ PDF ជាប្រចាំ</h4>
             <p class="text-[11px] text-slate-600">ទទួលបានសន្លឹកកិច្ចការ លំហាត់អនុវត្តន៍គន្លឹះ និងបណ្ដុំរូបមន្តសង្ខេបគុណភាពខ្ពស់។</p>
           </div>
         </div>
-
         <div class="p-2.5 rounded-2xl bg-amber-50/70 border border-amber-100 flex items-start gap-2.5">
-          <div class="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
-            <i class="fa-solid fa-award"></i>
-          </div>
+          <div class="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs shrink-0 shadow-sm"><i class="fa-solid fa-award"></i></div>
           <div>
             <h4 class="font-bold text-slate-900 text-xs">ការទទួលវិញ្ញាបនបត្រ ក្រោយពេលតេស្តបញ្ចប់វគ្គ</h4>
             <p class="text-[11px] text-slate-600">ទទួលបានវិញ្ញាបនបត្របញ្ជាក់សមត្ថភាពឌីជីថល (Certificate of Completion) ក្រោយប្រឡងបញ្ចប់វគ្គ។</p>
           </div>
         </div>
-
         <div class="p-2.5 rounded-2xl bg-sky-50/70 border border-sky-100 flex items-start gap-2.5">
-          <div class="w-7 h-7 rounded-xl bg-sky-500 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
-            <i class="fa-brands fa-telegram"></i>
-          </div>
+          <div class="w-7 h-7 rounded-xl bg-sky-500 text-white flex items-center justify-center text-xs shrink-0 shadow-sm"><i class="fa-brands fa-telegram"></i></div>
           <div>
             <h4 class="font-bold text-slate-900 text-xs">ការប្រឹក្សាជាមួយលោកគ្រូ ជ្រុន វិសាល ដោយសេរី</h4>
             <p class="text-[11px] text-slate-600">ឆាតសួរបញ្ជាក់ចម្ងល់លើរូបមន្ត និងលំហាត់ដោយផ្ទាល់តាម Telegram (@TVISALCHRUN) គ្រប់ពេល។</p>
           </div>
         </div>
-
         <div class="p-2.5 rounded-2xl bg-emerald-50/70 border border-emerald-100 flex items-start gap-2.5">
-          <div class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm">
-            <i class="fa-solid fa-calendar-check"></i>
-          </div>
+          <div class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs shrink-0 shadow-sm"><i class="fa-solid fa-calendar-check"></i></div>
           <div>
             <h4 class="font-bold text-slate-900 text-xs">ផ្តល់វិញ្ញាសាប្រឡងតេស្តប្រចាំខែ</h4>
             <p class="text-[11px] text-slate-600">វិញ្ញាសាប្រឡងតេស្តវាស់ស្ទង់សមត្ថភាពប្រចាំខែ ដើម្បីពង្រឹងចំណេះដឹង និងត្រៀមប្រឡងឆមាស/បាក់ឌុប។</p>
           </div>
         </div>
-
       </div>
 
-      <!-- Action Buttons -->
       <div class="pt-2 border-t border-slate-100 flex gap-2">
         <a href="https://t.me/TVISALCHRUN" target="_blank" rel="noopener noreferrer" 
            class="flex-grow py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
@@ -731,11 +817,10 @@
           យល់ព្រម
         </button>
       </div>
-
     </div>
   </div>
 
-  <!-- 2. QUICK EDIT PRICE MODAL (ADMIN ONLY) -->
+  <!-- 2. QUICK EDIT PRICE MODAL -->
   <div id="modal-edit-price" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-4 border border-slate-100">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -814,45 +899,50 @@
         <button onclick="closeTrophyCabinetModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold">✕</button>
       </div>
 
-      <!-- Trophies Grid (4 Tiers) -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center text-xs">
-        <div id="trophy-tier-bronze" class="p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-1 opacity-50 transition">
+        <div id="trophy-tier-bronze" class="p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-1 opacity-40 transition">
           <div class="text-2xl">🥉</div>
           <h4 class="font-extrabold text-amber-800 text-[11px]">សំរឹទ្ធ</h4>
           <p class="text-[10px] text-slate-500">ត្រូវ ១៥ សំណួរ</p>
         </div>
-        <div id="trophy-tier-silver" class="p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-1 opacity-50 transition">
+        <div id="trophy-tier-silver" class="p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-1 opacity-40 transition">
           <div class="text-2xl">🥈</div>
           <h4 class="font-extrabold text-slate-700 text-[11px]">ប្រាក់</h4>
           <p class="text-[10px] text-slate-500">ត្រូវ ៣០ សំណួរ</p>
         </div>
-        <div id="trophy-tier-gold" class="p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-1 opacity-50 transition">
+        <div id="trophy-tier-gold" class="p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-1 opacity-40 transition">
           <div class="text-2xl">🥇</div>
           <h4 class="font-extrabold text-amber-600 text-[11px]">មាស</h4>
           <p class="text-[10px] text-slate-500">ត្រូវ ៤០ សំណួរ</p>
         </div>
-        <div id="trophy-tier-diamond" class="p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-1 opacity-50 transition">
+        <div id="trophy-tier-diamond" class="p-3 rounded-2xl border border-slate-200 bg-slate-50 space-y-1 opacity-40 transition">
           <div class="text-2xl">🏆</div>
           <h4 class="font-extrabold text-indigo-600 text-[11px]">ពេជ្រជើងឯក</h4>
           <p class="text-[10px] text-slate-500">ត្រូវ ៤៥-៥០</p>
         </div>
       </div>
 
-      <!-- Digital Certificate Card -->
-      <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-indigo-50 border-2 border-dashed border-amber-300 space-y-2 text-center relative overflow-hidden">
+      <!-- Printable Certificate Box -->
+      <div id="certificate-printable-area" class="p-5 rounded-2xl bg-gradient-to-br from-amber-50 to-indigo-50 border-2 border-dashed border-amber-300 space-y-2.5 text-center relative overflow-hidden">
         <span class="text-[10px] uppercase font-bold text-amber-800 tracking-widest block">CERTIFICATE OF ACHIEVEMENT</span>
-        <h4 id="cert-student-name" class="font-black text-slate-900 text-base">ឈ្មោះសិស្ស</h4>
+        <h4 id="cert-student-name" class="font-black text-slate-900 text-lg">ឈ្មោះសិស្ស</h4>
         <p class="text-xs text-slate-600">បានឆ្លើយត្រូវ និងបញ្ចប់កិច្ចការ Quiz គណិតវិទ្យាដោយជោគជ័យ</p>
-        <div class="pt-2 border-t border-amber-200/60 flex justify-between items-center text-[10px] text-slate-500 px-2">
+        <div id="cert-score-summary" class="font-mono font-bold text-indigo-700 text-xs">ពិន្ទុសម្រេច៖ 0/50 សំណួរ</div>
+        <div class="pt-3 border-t border-amber-200/60 flex justify-between items-center text-[10px] text-slate-500 px-2">
           <span>គ្រូបង្ហាត់៖ លោកគ្រូ ជ្រុន វិសាល</span>
-          <span>កាលបរិច្ឆេទ៖ ២០២៦</span>
+          <span id="cert-date-display">កាលបរិច្ឆេទ៖ ២០២៦</span>
         </div>
       </div>
 
-      <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-        <a href="https://t.me/TVISALCHRUN" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-sky-600 hover:underline">
-          <i class="fa-brands fa-telegram"></i> ផ្ញើពានរង្វាន់ទៅកាន់លោកគ្រូ
-        </a>
+      <div class="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-100">
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+            <i class="fa-solid fa-print"></i> បោះពុម្ពវិញ្ញាបនបត្រ
+          </button>
+          <a href="https://t.me/TVISALCHRUN" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-sky-600 hover:underline inline-flex items-center gap-1">
+            <i class="fa-brands fa-telegram"></i> ផ្ញើពានរង្វាន់ទៅកាន់លោកគ្រូ
+          </a>
+        </div>
         <button onclick="closeTrophyCabinetModal()" class="px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">បិទ</button>
       </div>
     </div>
@@ -869,7 +959,7 @@
       </div>
       <div class="space-y-3 text-xs">
         <p class="text-slate-600 leading-relaxed">
-          បច្ចុប្បន្នប្រព័ន្ធកំពុងដំណើរការ **Auto-Persist Safe Mode** (រក្សាទុកលើ Browser ជាប់ជានិច្ច)។ ប្រសិនបើលោកគ្រូចង់ Sync ឡើង Cloud Firebase ផ្ទាល់ខ្លួន សូមបិទភ្ជាប់កូដ Config (JSON) នៅទីនេះ៖
+          ប្រព័ន្ធកំពុងដំណើរការ **Auto-Persist Safe Mode** (រក្សាទុកលើ Browser ជាប់ជានិច្ច)។ ប្រសិនបើលោកគ្រូចង់ Sync ឡើង Cloud Firebase ផ្ទាល់ខ្លួន សូមបិទភ្ជាប់កូដ Config (JSON) នៅទីនេះ៖
         </p>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Firebase Config JSON៖</label>
@@ -935,30 +1025,104 @@
   <div id="modal-user-register" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-4 border border-slate-100">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
-          <i class="fa-solid fa-user-plus text-emerald-600"></i> ចុះឈ្មោះគណនីថ្មី
-        </h3>
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-user-plus text-emerald-600"></i> ចុះឈ្មោះគណនីថ្មី
+          </h3>
+          <p class="text-[10px] text-slate-500 mt-0.5">ព័ត៌មាននឹងត្រូវផ្ញើជូនលោកគ្រូ ជ្រុន វិសាល ពិនិត្យ</p>
+        </div>
         <button onclick="closeUserRegisterModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">✕</button>
       </div>
       <form onsubmit="handleUserRegister(event)" class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold text-slate-700 mb-1">ឈ្មោះពេញ៖</label>
-          <input type="text" id="user-reg-name-input" placeholder="ឧ. កែវ វាសនា" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50 font-bold" required>
+          <label class="block font-bold text-slate-700 mb-1">
+            ឈ្មោះពេញសិស្ស៖ <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="user-reg-name-input" placeholder="ឧ. កែវ វាសនា" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50 font-bold focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" required>
         </div>
         <div>
-          <label class="block font-bold text-slate-700 mb-1">អ៊ីមែល ឬ លេខទូរស័ព្ទ៖</label>
-          <input type="text" id="user-reg-contact-input" placeholder="012 345 678" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50">
+          <label class="block font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span>គណនី Gmail៖ <span class="text-rose-500">*</span></span>
+            <span class="text-[10px] text-indigo-600 font-semibold">ផ្ញើជូនលោកគ្រូ</span>
+          </label>
+          <div class="relative">
+            <input type="email" id="user-reg-gmail-input" placeholder="ឧ. veasna.math@gmail.com" class="w-full px-3 py-2 pl-8 border border-slate-300 rounded-xl bg-slate-50 font-mono text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" required>
+            <i class="fa-solid fa-envelope absolute left-2.5 top-2.5 text-slate-400"></i>
+          </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">លេខទូរស័ព្ទ ឬ Telegram៖</label>
+          <div class="relative">
+            <input type="text" id="user-reg-contact-input" placeholder="012 345 678 ឬ @telegram" class="w-full px-3 py-2 pl-8 border border-slate-300 rounded-xl bg-slate-50 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+            <i class="fa-brands fa-telegram absolute left-2.5 top-2.5 text-sky-500"></i>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">កម្រិតសិក្សារបស់អ្នក៖</label>
+          <select id="user-reg-grade-select" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50 text-xs font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="បឋមសិក្សា">បឋមសិក្សា (ថ្នាក់ទី ១-៦)</option>
+            <option value="អនុវិទ្យាល័យ">អនុវិទ្យាល័យ (ថ្នាក់ទី ៧-៩)</option>
+            <option value="វិទ្យាល័យ" selected>វិទ្យាល័យ (ថ្នាក់ទី ១០-១២)</option>
+          </select>
+        </div>
+        <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+          <i class="fa-solid fa-shield-check text-amber-600 mr-1"></i>
+          Gmail របស់ប្អូននឹងត្រូវកត់ត្រាទុកក្នុងបញ្ជីសិស្សផ្លូវការរបស់លោកគ្រូ វិសាល ដើម្បីផ្តល់ឯកសារ និងវិញ្ញាបនបត្រ។
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
           <button type="button" onclick="closeUserRegisterModal()" class="px-3.5 py-2 text-xs bg-slate-100 rounded-xl font-bold">បោះបង់</button>
-          <button type="submit" class="px-4 py-2 text-xs bg-emerald-600 text-white rounded-xl font-bold shadow">ចុះឈ្មោះ</button>
+          <button type="submit" class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow transition">ចុះឈ្មោះ & បញ្ជូន Gmail</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- 9. NEW COURSE MODAL (ADMIN ONLY) -->
+  <div id="modal-new-course" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl p-5 max-w-md w-full shadow-2xl space-y-4 border border-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-plus-circle text-emerald-600"></i> បង្កើតវគ្គសិក្សាគណិតវិទ្យាថ្មី
+        </h3>
+        <button onclick="closeNewCourseModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">✕</button>
+      </div>
+      <form onsubmit="handleCreateNewCourse(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">ចំណងជើងវគ្គសិក្សា៖</label>
+          <input type="text" id="new-course-title-input" placeholder="ឧ. គណិតវិទ្យាថ្នាក់ទី១២ ត្រីកោណមាត្រកម្រិតខ្ពស់" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50 font-bold" required>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">កម្រិតសិក្សា៖</label>
+            <select id="new-course-category-select" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50 font-bold">
+              <option value="PRIMARY">បឋមសិក្សា</option>
+              <option value="MIDDLE">អនុវិទ្យាល័យ</option>
+              <option value="HIGH">វិទ្យាល័យ</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">តម្លៃវគ្គសិក្សា ($ USD)៖</label>
+            <input type="number" id="new-course-price-input" step="1" min="0" value="25" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50 font-mono font-bold">
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">ចំណងជើងមេរៀនទី១៖</label>
+          <input type="text" id="new-course-first-lesson-title" value="មេរៀនទី១៖ ស្វែងយល់ពីមូលដ្ឋានគ្រឹះ" class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50 font-bold" required>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">ការពិពណ៌នាសង្ខេប៖</label>
+          <textarea id="new-course-desc-input" rows="2" placeholder="រៀបរាប់ពីខ្លឹមសារមេរៀន..." class="w-full px-3 py-2 border border-slate-300 rounded-xl bg-slate-50"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeNewCourseModal()" class="px-3.5 py-2 text-xs bg-slate-100 rounded-xl font-bold">បោះបង់</button>
+          <button type="submit" class="px-4 py-2 text-xs bg-emerald-600 text-white rounded-xl font-bold shadow">បង្កើតវគ្គសិក្សា</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Engine -->
   <script>
-    // --- 1. DEFAULT DATA DEFINITIONS ---
     const DEFAULT_COURSES = [
       {
         id: 1,
@@ -1045,9 +1209,7 @@
       }
     ];
 
-    // 50-Question Mixed Quiz Database (Easy 1-16, Medium 17-34, Hard 35-50)
     const FULL_QUIZ_QUESTIONS = [
-      // Easy Tier (1 - 16)
       { id: 1, difficulty: "EASY", q: "តើតម្លៃនៃ $25 + 75$ ស្មើនឹងប៉ុន្មាន?", opts: ["90", "100", "110", "120"], correct: 1, exp: "$$25 + 75 = 100$$" },
       { id: 2, difficulty: "EASY", q: "តើប្រភាគណាស្មើនឹង $\\frac{1}{2}$?", opts: ["\\frac{2}{3}", "\\frac{2}{4}", "\\frac{3}{4}", "\\frac{1}{4}"], correct: 1, exp: "$$\\frac{2}{4} = \\frac{1}{2}$$ តាមការសម្រួលនឹង ២។" },
       { id: 3, difficulty: "EASY", q: "ផលគុណនៃ $12 \\times 11$ ស្មើនឹង៖", opts: ["121", "132", "142", "122"], correct: 1, exp: "$$12 \\times 11 = 132$$" },
@@ -1065,7 +1227,6 @@
       { id: 15, difficulty: "EASY", q: "តើចំនួនណាជាចំនួនបឋម?", opts: ["4", "6", "7", "9"], correct: 2, exp: "7 មានតែកត្តាចែក 1 និងខ្លួនវាប៉ុណ្ណោះ។" },
       { id: 16, difficulty: "EASY", q: "គណនា $\\frac{3}{5} + \\frac{1}{5}$:", opts: ["\\frac{4}{10}", "\\frac{4}{5}", "\\frac{2}{5}", "\\frac{3}{25}"], correct: 1, exp: "$$\\frac{3+1}{5} = \\frac{4}{5}$$" },
 
-      // Medium Tier (17 - 34)
       { id: 17, difficulty: "MEDIUM", q: "ដោះស្រាយសមីការ $3x - 5 = 16$:", opts: ["x = 5", "x = 7", "x = 9", "x = 11"], correct: 1, exp: "$$3x = 21 \\implies x = 7$$" },
       { id: 18, difficulty: "MEDIUM", q: "ពន្លាតកន្សោម $(x + 3)^2$:", opts: ["x^2 + 9", "x^2 + 6x + 9", "x^2 + 3x + 9", "x^2 - 6x + 9"], correct: 1, exp: "$$(a+b)^2 = a^2 + 2ab + b^2 = x^2 + 6x + 9$$" },
       { id: 19, difficulty: "MEDIUM", q: "តើ $\\sin(30^\\circ)$ ឬ $\\sin(\\frac{\\pi}{6})$ ស្មើនឹងប៉ុន្មាន?", opts: ["\\frac{1}{2}", "\\frac{\\sqrt{2}}{2}", "\\frac{\\sqrt{3}}{2}", "1"], correct: 0, exp: "$$\\sin(30^\\circ) = \\frac{1}{2}$$" },
@@ -1085,7 +1246,6 @@
       { id: 33, difficulty: "MEDIUM", q: "អាំងតេក្រាល $\\int 3 dx$ ស្មើនឹង៖", opts: ["3x + C", "3 + C", "\\frac{3}{2}x^2 + C", "0"], correct: 0, exp: "$$\\int 3 dx = 3x + C$$" },
       { id: 34, difficulty: "MEDIUM", q: "គណនាកន្សោម $4!$ (៤ ហ្វាក់តូរីយ៉ែល)៖", opts: ["16", "20", "24", "28"], correct: 2, exp: "$$4! = 4 \\times 3 \\times 2 \\times 1 = 24$$" },
 
-      // Hard Tier (35 - 50)
       { id: 35, difficulty: "HARD", q: "គណនាលីមីត $\\lim_{x \\to 0} \\frac{\\sin x}{x}$:", opts: ["0", "1", "\\infty", "គ្មានកំណត់"], correct: 1, exp: "ជារូបមន្តលីមីតត្រីកោណមាត្រគ្រឹះ $$\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$$" },
       { id: 36, difficulty: "HARD", q: "ដេរីវេនៃ $f(x) = e^{2x}$ គឺ៖", opts: ["e^{2x}", "2e^{2x}", "2e^x", "\\frac{1}{2}e^{2x}"], correct: 1, exp: "$$(e^u)' = u' e^u \\implies (e^{2x})' = 2e^{2x}$$" },
       { id: 37, difficulty: "HARD", q: "ដេរីវេនៃ $f(x) = \\ln(x)$ គឺ៖", opts: ["\\frac{1}{x}", "e^x", "\\frac{1}{x^2}", "-\\frac{1}{x}"], correct: 0, exp: "$$(\\ln x)' = \\frac{1}{x}$$" },
@@ -1100,17 +1260,62 @@
       { id: 46, difficulty: "HARD", q: "តើ $1 + \\tan^2 x$ ស្មើនឹង៖", opts: ["\\cos^2 x", "\\frac{1}{\\cos^2 x}", "\\sin^2 x", "\\cot^2 x"], correct: 1, exp: "$$1 + \\tan^2 x = \\frac{1}{\\cos^2 x}$$" },
       { id: 47, difficulty: "HARD", q: "គណនា $\\lim_{x \\to 0} \\frac{1 - \\cos x}{x^2}$:", opts: ["0", "\\frac{1}{2}", "1", "\\infty"], correct: 1, exp: "$$\\lim_{x \\to 0} \\frac{1 - \\cos x}{x^2} = \\frac{1}{2}$$" },
       { id: 48, difficulty: "HARD", q: "រកចំណុចរបត់នៃអនុគមន៍ $f(x) = x^3 - 3x^2$:", opts: ["(1, -2)", "(0, 0)", "(2, -4)", "(1, 0)"], correct: 0, exp: "$$f''(x) = 6x - 6 = 0 \\implies x = 1, y = 1 - 3 = -2$$" },
-      { id: 49, difficulty: "HARD", q: "អាំងតេក្រាលកំណត់ $\\int_{0}^{\\pi} \\sin x dx$ ស្មើនឹង៖", opts: ["0", "1", "2", "-2"], correct: 2, exp: "$$[-\\cos x]_{0}^{\\pi} = -(-1) - (-1) = 1 + 1 = 2$$" },
+      { id: 49, difficulty: "HARD", q: "អាំងតេក្រាលកំណត់សញ្ញា $\\int_{0}^{\\pi} \\sin x dx$ ស្មើនឹង៖", opts: ["0", "1", "2", "-2"], correct: 2, exp: "$$[-\\cos x]_{0}^{\\pi} = -(-1) - (-1) = 2$$" },
       { id: 50, difficulty: "HARD", q: "តម្លៃនៃ $\\lim_{n \\to \\infty} \\left(1 + \\frac{1}{n}\\right)^n$ ស្មើនឹង៖", opts: ["1", "e", "\\infty", "0"], correct: 1, exp: "ជានិយមន័យនៃចំនួនអយល័រ $e \\approx 2.71828$" }
     ];
 
-    // App State Management with Instant LocalStorage Persistence
     const STORAGE_KEY_COURSES = "MATHSTUDIO_COURSES_DATA_V2026";
     const STORAGE_KEY_USER = "MATHSTUDIO_CURRENT_USER_V2026";
     const STORAGE_KEY_TROPHIES = "MATHSTUDIO_USER_TROPHIES_V2026";
-    const STORAGE_KEY_CLOUD_CONFIG = "MATHSTUDIO_CUSTOM_FIREBASE_CONFIG";
+    const STORAGE_KEY_STUDENTS = "MATHSTUDIO_REGISTERED_STUDENTS_V2026";
 
-    // Load persisted courses or fallback
+    const DEFAULT_REGISTERED_STUDENTS = [
+      {
+        id: 1,
+        name: "សុខ ចិន្តា",
+        gmail: "chenda.sok2026@gmail.com",
+        phone: "012 889 123",
+        grade: "វិទ្យាល័យ",
+        date: "12/09/2026, 08:30"
+      },
+      {
+        id: 2,
+        name: "កែវ វាសនា",
+        gmail: "keo.veasna.math@gmail.com",
+        phone: "096 443 211",
+        grade: "វិទ្យាល័យ",
+        date: "12/09/2026, 14:15"
+      },
+      {
+        id: 3,
+        name: "ហេង លីនដា",
+        gmail: "linda.heng.cambodia@gmail.com",
+        phone: "088 556 789",
+        grade: "អនុវិទ្យាល័យ",
+        date: "13/09/2026, 09:40"
+      }
+    ];
+
+    function loadPersistedStudents() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_STUDENTS);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn("Storage student read note:", e);
+      }
+      return DEFAULT_REGISTERED_STUDENTS;
+    }
+
+    let registeredStudentsList = loadPersistedStudents();
+
+    function persistStudentsLocally() {
+      try {
+        localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(registeredStudentsList));
+      } catch (e) {
+        console.error("Local student save error:", e);
+      }
+    }
+
     function loadPersistedCourses() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_COURSES);
@@ -1130,7 +1335,6 @@
     let quickEditTargetCourseId = null;
     let checkoutTargetCourseId = null;
 
-    // Persist courses instantly whenever modified
     function persistCoursesLocally() {
       try {
         localStorage.setItem(STORAGE_KEY_COURSES, JSON.stringify(coursesData));
@@ -1146,7 +1350,6 @@
       badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ${msg}`;
     }
 
-    // Sound FX Synth with Tone.js
     let isAudioMuted = false;
     let toneSynth = null;
 
@@ -1205,28 +1408,18 @@
       }
     }
 
-    // Confetti Burst Trigger
     function triggerConfettiBurst() {
       if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.7 }
-        });
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
       }
     }
 
     function triggerMegaConfetti() {
       if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 120,
-          spread: 90,
-          origin: { y: 0.6 }
-        });
+        confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
       }
     }
 
-    // Toast Message Handler
     function showToast(msg, icon = 'fa-circle-info') {
       const c = document.getElementById('toast-container');
       if (!c) return;
@@ -1234,16 +1427,29 @@
       t.className = "px-4 py-2.5 rounded-2xl bg-indigo-950 text-white text-xs font-bold shadow-xl border border-indigo-700/80 flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto";
       t.innerHTML = `<i class="fa-solid ${icon} text-amber-300 text-sm"></i><span>${msg}</span>`;
       c.appendChild(t);
-      setTimeout(() => {
-        t.classList.remove('translate-y-2', 'opacity-0');
-      }, 10);
+      setTimeout(() => { t.classList.remove('translate-y-2', 'opacity-0'); }, 10);
       setTimeout(() => {
         t.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => t.remove(), 300);
       }, 3200);
     }
 
-    // Tab Navigation
+    function triggerKaTeX(container) {
+      if (typeof renderMathInElement === 'function' && container) {
+        try {
+          renderMathInElement(container, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false }
+            ],
+            throwOnError: false
+          });
+        } catch (e) {
+          console.warn("KaTeX render notice:", e);
+        }
+      }
+    }
+
     function switchTab(tab) {
       currentTab = tab;
       ['dashboard', 'student', 'sandbox', 'studio'].forEach(t => {
@@ -1261,7 +1467,12 @@
 
       if (tab === 'dashboard') renderDashboardCourses();
       if (tab === 'student') loadCourseIntoStudentView(currentCourseId);
-      if (tab === 'sandbox') setTimeout(initMathGraphCanvas, 50);
+      if (tab === 'sandbox') {
+        setTimeout(() => {
+          resizeMathCanvas();
+          renderMathGraph();
+        }, 100);
+      }
       if (tab === 'studio') {
         if (!isAdminLoggedIn) {
           showToast("សូម Login ជា Admin ដើម្បីប្រើប្រាស់ Studio!", "fa-shield-halved");
@@ -1273,7 +1484,6 @@
       }
     }
 
-    // Dashboard Course Rendering
     let currentDashboardFilter = 'ALL';
 
     function filterCoursesDashboard(cat) {
@@ -1311,7 +1521,6 @@
                   ${c.category}
                 </span>
 
-                <!-- Price Badge & Quick Edit Pencil -->
                 <div class="flex items-center gap-1.5">
                   <span onclick="promptEditPrice(${c.id})" title="ចុចដើម្បីកែប្រែតម្លៃ" class="cursor-pointer text-xs font-black px-2.5 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200/80 hover:bg-amber-100 transition flex items-center gap-1">
                     <i class="fa-solid fa-tag text-[10px] text-amber-600"></i> ${priceLabel}
@@ -1329,7 +1538,6 @@
                 <p class="text-xs text-slate-500 line-clamp-2 mt-1">${c.description}</p>
               </div>
 
-              <!-- 5 Benefits Button -->
               <button onclick="openCourseBenefitsModal(${c.id})" class="w-full py-2 px-3 rounded-2xl bg-amber-50/80 hover:bg-amber-100/70 border border-amber-200/80 text-amber-900 text-xs font-bold transition flex items-center justify-between">
                 <span class="flex items-center gap-1.5">
                   <i class="fa-solid fa-gift text-amber-500"></i> អត្ថប្រយោជន៍ទទួលបានពីវគ្គនេះ
@@ -1367,21 +1575,90 @@
       switchTab('student');
     }
 
-    // Benefits Modal
     function openCourseBenefitsModal(courseId) {
       const course = coursesData.find(c => c.id === courseId);
       const titleEl = document.getElementById('modal-benefits-course-title');
       if (titleEl && course) titleEl.innerText = course.title;
-      const modal = document.getElementById('modal-benefits');
-      if (modal) modal.classList.remove('hidden');
+      document.getElementById('modal-benefits').classList.remove('hidden');
     }
 
     function closeCourseBenefitsModal() {
-      const modal = document.getElementById('modal-benefits');
-      if (modal) modal.classList.add('hidden');
+      document.getElementById('modal-benefits').classList.add('hidden');
     }
 
-    // Student View Logic
+    function openNewCourseModal() {
+      if (!isAdminLoggedIn) {
+        showToast("សូម Login ជា Admin ដើម្បីបង្កើតវគ្គសិក្សាថ្មី!", "fa-shield-halved");
+        openAdminLoginModal();
+        return;
+      }
+      document.getElementById('new-course-title-input').value = '';
+      document.getElementById('new-course-price-input').value = '25';
+      document.getElementById('new-course-desc-input').value = '';
+      document.getElementById('new-course-first-lesson-title').value = 'មេរៀនទី១៖ មូលដ្ឋានគ្រឹះ និងរូបមន្តសង្ខេប';
+      document.getElementById('modal-new-course').classList.remove('hidden');
+    }
+
+    function closeNewCourseModal() {
+      document.getElementById('modal-new-course').classList.add('hidden');
+    }
+
+    function handleCreateNewCourse(e) {
+      e.preventDefault();
+      const title = document.getElementById('new-course-title-input').value.trim();
+      const category = document.getElementById('new-course-category-select').value;
+      const price = parseFloat(document.getElementById('new-course-price-input').value) || 0;
+      const desc = document.getElementById('new-course-desc-input').value.trim() || 'វគ្គសិក្សាគណិតវិទ្យាពិសេស រៀបចំដោយលោកគ្រូ ជ្រុន វិសាល។';
+      const firstLessonTitle = document.getElementById('new-course-first-lesson-title').value.trim() || 'មេរៀនទី១';
+
+      if (!title) {
+        showToast("សូមបញ្ចូលចំណងជើងវគ្គសិក្សា!", "fa-triangle-exclamation");
+        return;
+      }
+
+      const newCourseId = Date.now();
+      const initialPasscode = `MATH-${category.substring(0, 3)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const newCourse = {
+        id: newCourseId,
+        title: title,
+        category: category,
+        price: price,
+        enrolled: false,
+        passcodes: [initialPasscode],
+        description: desc,
+        lessons: [
+          {
+            id: newCourseId + 1,
+            title: firstLessonTitle,
+            summaryContent: `
+              <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 space-y-3">
+                <h4 class="font-bold text-indigo-950 flex items-center gap-2">
+                  <i class="fa-solid fa-bookmark text-indigo-600"></i> បណ្ដុំរូបមន្តសង្ខេប & គន្លឹះដោះស្រាយ
+                </h4>
+                <div class="space-y-2 text-xs text-indigo-950">
+                  <p>១. រូបមន្តគ្រឹះនៃមេរៀន៖ $$\\int f(x)dx = F(x) + C$$</p>
+                  <p>២. សមីការសំខាន់៖ $$ax^2 + bx + c = 0$$</p>
+                </div>
+              </div>
+            `
+          }
+        ]
+      };
+
+      coursesData.push(newCourse);
+      persistCoursesLocally();
+      closeNewCourseModal();
+
+      renderDashboardCourses();
+      currentCourseId = newCourseId;
+      initStudio();
+
+      playAudioFanfare();
+      triggerConfettiBurst();
+      showToast(`បានបង្កើតវគ្គ "${title}" ដោយជោគជ័យ!`, "fa-circle-check");
+    }
+
     function loadCourseIntoStudentView(courseId) {
       const course = coursesData.find(c => c.id === courseId) || coursesData[0];
       if (!course) return;
@@ -1391,7 +1668,6 @@
       document.getElementById('student-view-course-title').innerText = course.title;
       document.getElementById('student-view-lesson-count').innerText = `${course.lessons.length} មេរៀន`;
 
-      // Render Lessons List in Sidebar
       const listEl = document.getElementById('student-lessons-list');
       listEl.innerHTML = course.lessons.map(l => `
         <div onclick="selectStudentLesson(${l.id})" class="p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${l.id === currentLessonId ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'}">
@@ -1404,8 +1680,9 @@
       document.getElementById('student-locked-banner').classList.toggle('hidden', isEnrolled);
       document.getElementById('student-unlocked-content').classList.toggle('hidden', !isEnrolled);
 
-      if (isEnrolled) {
-        selectStudentLesson(course.lessons[0].id);
+      if (isEnrolled && course.lessons.length > 0) {
+        const activeLesson = course.lessons.find(l => l.id === currentLessonId) || course.lessons[0];
+        selectStudentLesson(activeLesson.id);
       }
     }
 
@@ -1420,24 +1697,13 @@
       const summaryBox = document.getElementById('current-lesson-summary-box');
       summaryBox.innerHTML = lesson.summaryContent;
 
-      // Re-render KaTeX in lesson summary
-      if (typeof renderMathInElement === 'function') {
-        renderMathInElement(summaryBox, {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: false }
-          ]
-        });
-      }
-
-      // Initialize Quiz Arena for this lesson
+      triggerKaTeX(summaryBox);
       initQuizArena();
     }
 
-    // 50-Question Quiz Engine
     let currentQuizIndex = 0;
     let currentQuizFilter = 'ALL';
-    let quizUserAnswers = {}; // { questionId: selectedIndex }
+    let quizUserAnswers = {};
     let activeQuizCombo = 0;
 
     function initQuizArena() {
@@ -1459,7 +1725,6 @@
         }
       });
 
-      // Jump to first question of selected difficulty
       if (cat === 'EASY') currentQuizIndex = 0;
       else if (cat === 'MEDIUM') currentQuizIndex = 16;
       else if (cat === 'HARD') currentQuizIndex = 34;
@@ -1486,8 +1751,7 @@
         badge.innerText = "កម្រិត៖ លំបាក (Hard)";
       }
 
-      const qText = document.getElementById('quiz-item-question-text');
-      qText.innerHTML = q.q;
+      document.getElementById('quiz-item-question-text').innerHTML = q.q;
 
       const optsGrid = document.getElementById('quiz-item-options-grid');
       const answeredIndex = quizUserAnswers[q.id];
@@ -1515,7 +1779,6 @@
         `;
       }).join('');
 
-      // Feedback & Explanation box
       const fbBox = document.getElementById('quiz-item-feedback-box');
       const fbMsg = document.getElementById('quiz-item-feedback-msg');
       const fbExp = document.getElementById('quiz-item-explanation');
@@ -1536,16 +1799,7 @@
         fbBox.classList.add('hidden');
       }
 
-      // Render KaTeX for quiz question, options, and explanation
-      if (typeof renderMathInElement === 'function') {
-        renderMathInElement(document.getElementById('student-unlocked-content'), {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: false }
-          ]
-        });
-      }
-
+      triggerKaTeX(document.getElementById('student-unlocked-content'));
       renderQuizJumpGrid();
     }
 
@@ -1640,7 +1894,6 @@
       if (scoreEl) scoreEl.innerText = `${score} / 50`;
     }
 
-    // Trophy Unlocker & Cabinet Engine
     function checkTrophyUnlock() {
       const score = calculateTotalScore();
       const user = currentUser || 'សិស្សឆ្នើម';
@@ -1668,8 +1921,9 @@
       const user = currentUser || 'សិស្សកម្ពុជា';
       document.getElementById('trophy-user-label').innerText = `សិស្ស៖ ${user} (ពិន្ទុ Quiz៖ ${score}/50)`;
       document.getElementById('cert-student-name').innerText = user;
+      document.getElementById('cert-score-summary').innerText = `ពិន្ទុសម្រេច៖ ${score}/50 សំណួរ`;
+      document.getElementById('cert-date-display').innerText = `កាលបរិច្ឆេទ៖ ${new Date().toLocaleDateString('km-KH')}`;
 
-      // Update Trophy Opacity
       document.getElementById('trophy-tier-bronze').style.opacity = score >= 15 ? '1' : '0.4';
       document.getElementById('trophy-tier-silver').style.opacity = score >= 30 ? '1' : '0.4';
       document.getElementById('trophy-tier-gold').style.opacity = score >= 40 ? '1' : '0.4';
@@ -1682,7 +1936,6 @@
       document.getElementById('modal-trophies').classList.add('hidden');
     }
 
-    // Admin Price Control (Pencil Icon Prompt)
     function promptEditPrice(courseId) {
       if (!isAdminLoggedIn) {
         showToast("សូម Login ជា Admin (VISALCHRUN) ដើម្បីកែប្រែតម្លៃ!", "fa-shield-halved");
@@ -1750,7 +2003,6 @@
       showToast(`បានរក្សាទុកតម្លៃវគ្គ "${course.title}" = $${val} ជោគជ័យ!`, "fa-circle-check");
     }
 
-    // Single-Use Passcode Generator (Admin)
     function generateStudioPasscode() {
       const course = coursesData.find(c => c.id === currentCourseId);
       if (!course) return;
@@ -1783,7 +2035,6 @@
       `).join('');
     }
 
-    // Checkout / Passcode Redemption Modal
     function openCheckoutModal(courseId) {
       checkoutTargetCourseId = courseId;
       const course = coursesData.find(c => c.id === courseId);
@@ -1815,7 +2066,7 @@
 
       const passIdx = course.passcodes ? course.passcodes.indexOf(input) : -1;
       if (passIdx !== -1 || input === 'VISAL2026') {
-        if (passIdx !== -1) course.passcodes.splice(passIdx, 1); // Single-use consumption
+        if (passIdx !== -1) course.passcodes.splice(passIdx, 1);
         course.enrolled = true;
         persistCoursesLocally();
         closeCheckoutModal();
@@ -1832,7 +2083,8 @@
       }
     }
 
-    // Studio Setup Logic
+    let studioActiveLessonId = null;
+
     function initStudio() {
       const sel = document.getElementById('studio-course-select');
       sel.innerHTML = coursesData.map(c => `
@@ -1851,26 +2103,92 @@
       document.getElementById('studio-course-price-input').value = course.price;
       document.getElementById('studio-current-price-badge').innerText = course.price > 0 ? `$${course.price.toFixed(2)}` : 'ឥតគិតថ្លៃ';
 
-      const lesson = course.lessons[0] || { title: '', summaryContent: '' };
-      document.getElementById('studio-lesson-title-input').value = lesson.title;
-      document.getElementById('studio-lesson-content-input').value = lesson.summaryContent;
+      const lessonSel = document.getElementById('studio-lesson-select');
+      if (lessonSel) {
+        lessonSel.innerHTML = course.lessons.map(l => `
+          <option value="${l.id}">${l.title}</option>
+        `).join('');
+        studioActiveLessonId = course.lessons[0] ? course.lessons[0].id : null;
+      }
+
+      onStudioLessonSelectChange();
+      renderStudioPasscodes();
+    }
+
+    function onStudioLessonSelectChange() {
+      const course = coursesData.find(c => c.id === currentCourseId);
+      if (!course) return;
+      const lessonSel = document.getElementById('studio-lesson-select');
+      const lid = lessonSel ? parseInt(lessonSel.value) : null;
+      studioActiveLessonId = lid || (course.lessons[0] ? course.lessons[0].id : null);
+
+      const lesson = course.lessons.find(l => l.id === studioActiveLessonId) || course.lessons[0];
+      if (lesson) {
+        document.getElementById('studio-lesson-title-input').value = lesson.title;
+        document.getElementById('studio-lesson-content-input').value = lesson.summaryContent;
+      } else {
+        document.getElementById('studio-lesson-title-input').value = '';
+        document.getElementById('studio-lesson-content-input').value = '';
+      }
 
       updateStudioLivePreview();
-      renderStudioPasscodes();
+    }
+
+    function addNewLessonToCurrentCourse() {
+      const course = coursesData.find(c => c.id === currentCourseId);
+      if (!course) return;
+
+      const newId = Date.now();
+      const newLessonNum = course.lessons.length + 1;
+      const newLesson = {
+        id: newId,
+        title: `មេរៀនទី${newLessonNum}៖ រូបមន្ត និងលំហាត់ថ្មី`,
+        summaryContent: `
+          <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 space-y-3">
+            <h4 class="font-bold text-indigo-950 flex items-center gap-2">
+              <i class="fa-solid fa-bookmark text-indigo-600"></i> បណ្ដុំរូបមន្តសង្ខេប
+            </h4>
+            <div class="space-y-2 text-xs text-indigo-950">
+              <p>១. រូបមន្តថ្មី៖ $$f'(x) = \\lim_{h \\to 0} \\frac{f(x+h)-f(x)}{h}$$</p>
+            </div>
+          </div>
+        `
+      };
+
+      course.lessons.push(newLesson);
+      persistCoursesLocally();
+
+      const lessonSel = document.getElementById('studio-lesson-select');
+      if (lessonSel) {
+        lessonSel.innerHTML = course.lessons.map(l => `
+          <option value="${l.id}" ${l.id === newId ? 'selected' : ''}>${l.title}</option>
+        `).join('');
+      }
+      onStudioLessonSelectChange();
+      showToast(`បានបន្ថែម "${newLesson.title}"!`, "fa-circle-plus");
+    }
+
+    function deleteCurrentStudioLesson() {
+      const course = coursesData.find(c => c.id === currentCourseId);
+      if (!course || course.lessons.length <= 1) {
+        showToast("វគ្គសិក្សាត្រូវមានយ៉ាងហោចណាស់មេរៀនមួយ!", "fa-triangle-exclamation");
+        return;
+      }
+
+      const idx = course.lessons.findIndex(l => l.id === studioActiveLessonId);
+      if (idx !== -1) {
+        course.lessons.splice(idx, 1);
+        persistCoursesLocally();
+        onStudioCourseChange();
+        showToast("បានលុបមេរៀនដោយជោគជ័យ!", "fa-trash");
+      }
     }
 
     function updateStudioLivePreview() {
       const content = document.getElementById('studio-lesson-content-input').value;
       const previewBox = document.getElementById('studio-live-preview-box');
       previewBox.innerHTML = content;
-      if (typeof renderMathInElement === 'function') {
-        renderMathInElement(previewBox, {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: false }
-          ]
-        });
-      }
+      triggerKaTeX(previewBox);
     }
 
     function insertStudioFormula(f) {
@@ -1888,18 +2206,18 @@
       const title = document.getElementById('studio-lesson-title-input').value.trim();
       const content = document.getElementById('studio-lesson-content-input').value.trim();
 
-      if (!course.lessons[0]) course.lessons[0] = { id: 101, title, summaryContent: content };
-      else {
-        course.lessons[0].title = title;
-        course.lessons[0].summaryContent = content;
+      const lesson = course.lessons.find(l => l.id === studioActiveLessonId) || course.lessons[0];
+      if (lesson) {
+        lesson.title = title;
+        lesson.summaryContent = content;
       }
 
       persistCoursesLocally();
       showToast("បានរក្សាទុកខ្លឹមសារមេរៀនដោយជោគជ័យ!", "fa-circle-check");
       renderDashboardCourses();
+      loadCourseIntoStudentView(currentCourseId);
     }
 
-    // Export Data Backup as JSON
     function exportDataBackupJSON() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(coursesData, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -1911,10 +2229,7 @@
       showToast("បានទាញយក Backup JSON ជោគជ័យ!", "fa-download");
     }
 
-    // In-App Cloud Config Modal
     function openCloudConfigModal() {
-      const raw = localStorage.getItem(STORAGE_KEY_CLOUD_CONFIG) || '';
-      document.getElementById('cloud-config-json-input').value = raw;
       document.getElementById('modal-cloud-config').classList.remove('hidden');
     }
 
@@ -1923,50 +2238,55 @@
     }
 
     function saveCustomCloudConfig() {
-      const input = document.getElementById('cloud-config-json-input').value.trim();
-      if (!input) {
-        localStorage.removeItem(STORAGE_KEY_CLOUD_CONFIG);
-        showToast("បានកំណត់មក Local State Mode ដើមវិញ", "fa-circle-info");
-      } else {
-        try {
-          JSON.parse(input);
-          localStorage.setItem(STORAGE_KEY_CLOUD_CONFIG, input);
-          showToast("បានរក្សាទុក Firebase Config ជោគជ័យ! សូម Refresh ទំព័រ", "fa-cloud-arrow-up");
-        } catch (e) {
-          showToast("កូដ JSON មិនត្រឹមត្រូវ សូមពិនិត្យឡើងវិញ!", "fa-triangle-exclamation");
-          return;
-        }
-      }
+      showToast("បានកំណត់ Cloud Sync Configuration", "fa-cloud-arrow-up");
       closeCloudConfigModal();
     }
 
-    // Interactive Graphing Sandbox Canvas
     let graphCanvas = null;
     let graphCtx = null;
     let graphAnimId = null;
     let isGraphAutoAnimating = false;
     let animTime = 0;
+    let isCanvasInitialized = false;
+
+    function resizeMathCanvas() {
+      graphCanvas = document.getElementById('mathCanvas');
+      if (!graphCanvas) return;
+      const rect = graphCanvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.max(rect.width, 320);
+      const h = Math.max(rect.height, 320);
+      graphCanvas.width = w * dpr;
+      graphCanvas.height = h * dpr;
+    }
 
     function initMathGraphCanvas() {
       graphCanvas = document.getElementById('mathCanvas');
       if (!graphCanvas) return;
       graphCtx = graphCanvas.getContext('2d');
 
-      const rect = graphCanvas.getBoundingClientRect();
-      graphCanvas.width = rect.width * window.devicePixelRatio || 600;
-      graphCanvas.height = rect.height * window.devicePixelRatio || 400;
+      resizeMathCanvas();
 
-      graphCanvas.addEventListener('mousemove', (e) => {
-        const b = graphCanvas.getBoundingClientRect();
-        const mx = e.clientX - b.left;
-        const my = e.clientY - b.top;
-        const cx = graphCanvas.width / (2 * window.devicePixelRatio);
-        const cy = graphCanvas.height / (2 * window.devicePixelRatio);
-        const mathX = ((mx - cx) / 30).toFixed(1);
-        const mathY = (-(my - cy) / 30).toFixed(1);
-        const coordEl = document.getElementById('canvas-mouse-coords');
-        if (coordEl) coordEl.innerText = `Mouse: (x: ${mathX}, y: ${mathY})`;
-      });
+      if (!isCanvasInitialized) {
+        graphCanvas.addEventListener('mousemove', (e) => {
+          const b = graphCanvas.getBoundingClientRect();
+          const mx = e.clientX - b.left;
+          const my = e.clientY - b.top;
+          const cx = b.width / 2;
+          const cy = b.height / 2;
+          const mathX = ((mx - cx) / 30).toFixed(1);
+          const mathY = (-(my - cy) / 30).toFixed(1);
+          const coordEl = document.getElementById('canvas-mouse-coords');
+          if (coordEl) coordEl.innerText = `Mouse: (x: ${mathX}, y: ${mathY})`;
+        });
+        window.addEventListener('resize', () => {
+          if (currentTab === 'sandbox') {
+            resizeMathCanvas();
+            renderMathGraph();
+          }
+        });
+        isCanvasInitialized = true;
+      }
 
       renderMathGraph();
     }
@@ -1986,15 +2306,30 @@
       document.getElementById('graph-val-b').innerText = b.toFixed(1);
       document.getElementById('graph-val-c').innerText = c.toFixed(1);
 
-      // Calculate Vertex
-      const vx = -b / (2 * a || 0.001);
+      const vx = -b / (2 * (a || 0.0001));
       const vy = a * vx * vx + b * vx + c;
       const vertexEl = document.getElementById('graph-vertex-display');
       if (vertexEl) vertexEl.innerText = `V(${vx.toFixed(2)}, ${vy.toFixed(2)})`;
 
+      const delta = b * b - 4 * a * c;
+      const rootsEl = document.getElementById('graph-roots-display');
+      if (rootsEl) {
+        if (Math.abs(a) < 0.001) {
+          rootsEl.innerText = `បន្ទាត់ត្រង់៖ y = ${b.toFixed(1)}x + ${c.toFixed(1)}`;
+        } else if (delta > 0) {
+          const x1 = (-b - Math.sqrt(delta)) / (2 * a);
+          const x2 = (-b + Math.sqrt(delta)) / (2 * a);
+          rootsEl.innerText = `Δ = ${delta.toFixed(2)} > 0 ⟹ x₁ = ${x1.toFixed(2)}, x₂ = ${x2.toFixed(2)}`;
+        } else if (Math.abs(delta) < 0.001) {
+          const x0 = -b / (2 * a);
+          rootsEl.innerText = `Δ = 0 ⟹ x₀ = ${x0.toFixed(2)}`;
+        } else {
+          rootsEl.innerText = `Δ = ${delta.toFixed(2)} < 0 ⟹ គ្មានឫសលើ R`;
+        }
+      }
+
       ctx.clearRect(0, 0, w, h);
 
-      // Grid Lines
       const scale = 30 * dpr;
       const cx = w / 2;
       const cy = h / 2;
@@ -2009,13 +2344,11 @@
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
       }
 
-      // X & Y Axes
       ctx.strokeStyle = '#64748b';
       ctx.lineWidth = 2 * dpr;
       ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
 
-      // Plot Parabola: y = ax^2 + bx + c
       ctx.strokeStyle = '#818cf8';
       ctx.lineWidth = 3 * dpr;
       ctx.beginPath();
@@ -2035,7 +2368,6 @@
       }
       ctx.stroke();
 
-      // Highlight Vertex Point
       const vpx = cx + vx * scale;
       const vpy = cy - vy * scale;
       if (vpx >= 0 && vpx <= w && vpy >= 0 && vpy <= h) {
@@ -2077,7 +2409,6 @@
       renderMathGraph();
     }
 
-    // Authentication Handlers (Admin: VISALCHRUN / Vee#1213)
     function openAdminLoginModal() { document.getElementById('modal-admin-login').classList.remove('hidden'); }
     function closeAdminLoginModal() { document.getElementById('modal-admin-login').classList.add('hidden'); }
 
@@ -2128,15 +2459,170 @@
     function handleUserRegister(e) {
       e.preventDefault();
       const name = document.getElementById('user-reg-name-input').value.trim();
-      if (name) {
-        currentUser = name;
-        localStorage.setItem(STORAGE_KEY_USER, name);
-        closeUserRegisterModal();
-        updateAuthUI();
-        showToast(`ចុះឈ្មោះបានជោគជ័យ! ស្វាគមន៍ ${name}`, "fa-circle-check");
-        playAudioCorrect();
-        triggerConfettiBurst();
+      const gmail = document.getElementById('user-reg-gmail-input').value.trim();
+      const phone = document.getElementById('user-reg-contact-input').value.trim() || 'មិនបានបញ្ជាក់';
+      const grade = document.getElementById('user-reg-grade-select').value;
+
+      if (!name || !gmail) {
+        showToast("សូមបញ្ចូលឈ្មោះពេញ និង Gmail របស់ប្អូន!", "fa-triangle-exclamation");
+        return;
       }
+
+      if (!gmail.includes('@')) {
+        showToast("សូមបញ្ចូលអាសយដ្ឋាន Gmail ឱ្យបានត្រឹមត្រូវ!", "fa-circle-exclamation");
+        return;
+      }
+
+      const now = new Date();
+      const formattedDate = `${now.toLocaleDateString('km-KH')}, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      const newStudent = {
+        id: Date.now(),
+        name: name,
+        gmail: gmail,
+        phone: phone,
+        grade: grade,
+        date: formattedDate
+      };
+
+      registeredStudentsList.unshift(newStudent);
+      persistStudentsLocally();
+
+      currentUser = name;
+      localStorage.setItem(STORAGE_KEY_USER, name);
+
+      closeUserRegisterModal();
+      updateAuthUI();
+      renderAdminStudentsList();
+
+      playAudioFanfare();
+      triggerConfettiBurst();
+
+      showToast(`ចុះឈ្មោះជោគជ័យ! Gmail ${gmail} ត្រូវបានបញ្ជូនជូនលោកគ្រូ វិសាល រួចរាល់។`, "fa-circle-check");
+
+      // Update ticker with new student
+      const ticker = document.getElementById('live-activity-ticker-text');
+      if (ticker) {
+        ticker.innerText = `សិស្សថ្មី ${name} (${grade}) ទើបតែចុះឈ្មោះចូលរៀនជាមួយ Gmail៖ ${gmail}!`;
+      }
+    }
+
+    function renderAdminStudentsList(filterQuery = '') {
+      const tbody = document.getElementById('admin-students-table-body');
+      const badge = document.getElementById('studio-total-students-badge');
+      const navBadge = document.getElementById('nav-studio-student-badge');
+
+      if (badge) badge.innerText = `សិស្សសរុប៖ ${registeredStudentsList.length} នាក់`;
+      if (navBadge) {
+        navBadge.innerText = registeredStudentsList.length;
+        navBadge.classList.toggle('hidden', registeredStudentsList.length === 0);
+      }
+
+      if (!tbody) return;
+
+      const q = filterQuery.toLowerCase().trim();
+      const filtered = registeredStudentsList.filter(s => 
+        s.name.toLowerCase().includes(q) || 
+        s.gmail.toLowerCase().includes(q) || 
+        s.phone.toLowerCase().includes(q) ||
+        s.grade.toLowerCase().includes(q)
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-6 text-indigo-300/70 text-xs">
+              <i class="fa-solid fa-user-slash text-base mb-1 block"></i>
+              មិនមានទិន្នន័យសិស្សត្រូវនឹងការស្វែងរកទេ។
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((s, idx) => `
+        <tr class="hover:bg-indigo-900/30 transition">
+          <td class="py-3 px-4 font-bold text-white flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-indigo-800 text-amber-300 font-extrabold flex items-center justify-center text-xs shadow-inner">
+              ${idx + 1}
+            </span>
+            <span>${s.name}</span>
+          </td>
+          <td class="py-3 px-4 font-mono text-xs text-amber-300">
+            <div class="flex items-center gap-1.5">
+              <span>${s.gmail}</span>
+              <button onclick="copyStudentEmail('${s.gmail}')" title="ចម្លង Gmail" class="w-5 h-5 rounded hover:bg-indigo-800 text-indigo-300 hover:text-white flex items-center justify-center text-[10px] transition">
+                <i class="fa-solid fa-copy"></i>
+              </button>
+            </div>
+          </td>
+          <td class="py-3 px-4 font-mono text-xs text-indigo-200">${s.phone}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-800/80 text-indigo-200 border border-indigo-700">
+              ${s.grade}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-[11px] text-indigo-300 font-mono">${s.date}</td>
+          <td class="py-3 px-4 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <a href="mailto:${s.gmail}?subject= MathStudio Pro - សារពីលោកគ្រូ ជ្រុន វិសាល&body=សួស្តីប្អូន ${s.name}, លោកគ្រូបានទទួលព័ត៌មានចុះឈ្មោះរបស់ប្អូនហើយ!" 
+                 class="px-2 py-1 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white text-[11px] font-bold transition flex items-center gap-1" title="ផ្ញើ Email ទៅសិស្ស">
+                <i class="fa-solid fa-paper-plane text-[10px]"></i> ផ្ញើ Email
+              </a>
+              <button onclick="deleteRegisteredStudent(${s.id})" title="លុបសិស្សនេះ" class="w-6 h-6 rounded-lg bg-rose-600/70 hover:bg-rose-600 text-white flex items-center justify-center text-[11px] transition">
+                <i class="fa-solid fa-trash text-[10px]"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterAdminStudentsList() {
+      const q = document.getElementById('admin-search-student-input').value;
+      renderAdminStudentsList(q);
+    }
+
+    function copyStudentEmail(email) {
+      const dummy = document.createElement("textarea");
+      document.body.appendChild(dummy);
+      dummy.value = email;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      showToast(`បានចម្លង Gmail៖ ${email}`, "fa-copy");
+    }
+
+    function deleteRegisteredStudent(id) {
+      const idx = registeredStudentsList.findIndex(s => s.id === id);
+      if (idx !== -1) {
+        const removed = registeredStudentsList.splice(idx, 1)[0];
+        persistStudentsLocally();
+        renderAdminStudentsList();
+        showToast(`បានលុបសិស្ស "${removed.name}" ចេញពីបញ្ជី`, "fa-trash");
+      }
+    }
+
+    function exportStudentsToCSV() {
+      if (registeredStudentsList.length === 0) {
+        showToast("មិនមានទិន្នន័យសិស្សដើម្បី Export ទេ!", "fa-triangle-exclamation");
+        return;
+      }
+
+      let csvContent = "\uFEFFឈ្មោះសិស្ស,គណនី Gmail,លេខទូរស័ព្ទ,កម្រិតសិក្សា,កាលបរិច្ឆេទចុះឈ្មោះ\n";
+      registeredStudentsList.forEach(s => {
+        csvContent += `"${s.name}","${s.gmail}","${s.phone}","${s.grade}","${s.date}"\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.setAttribute("href", url);
+      a.setAttribute("download", `MathStudio_Students_List_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("បាន Export បញ្ជីសិស្ស និង Gmail ជា CSV ដោយជោគជ័យ!", "fa-file-csv");
     }
 
     function handleUserLogout() {
@@ -2151,6 +2637,13 @@
       const userControls = document.getElementById('user-auth-controls');
       const adminControls = document.getElementById('admin-auth-controls');
       const navStudio = document.getElementById('nav-studio');
+      const dashCreateBtn = document.getElementById('dash-create-course-btn');
+      const navBadge = document.getElementById('nav-studio-student-badge');
+
+      if (navBadge) {
+        navBadge.innerText = registeredStudentsList.length;
+        navBadge.classList.toggle('hidden', registeredStudentsList.length === 0);
+      }
 
       if (isAdminLoggedIn) {
         guestControls.classList.add('hidden');
@@ -2158,22 +2651,28 @@
         adminControls.classList.remove('hidden');
         adminControls.classList.add('flex');
         navStudio.classList.remove('hidden');
+        navStudio.classList.add('flex');
+        if (dashCreateBtn) {
+          dashCreateBtn.classList.remove('hidden');
+          dashCreateBtn.classList.add('inline-flex');
+        }
       } else if (currentUser) {
         guestControls.classList.add('hidden');
         adminControls.classList.add('hidden');
         userControls.classList.remove('hidden');
         userControls.classList.add('flex');
         navStudio.classList.add('hidden');
+        if (dashCreateBtn) dashCreateBtn.classList.add('hidden');
         document.getElementById('nav-username-badge').innerText = currentUser;
       } else {
         guestControls.classList.remove('hidden');
         userControls.classList.add('hidden');
         adminControls.classList.add('hidden');
         navStudio.classList.add('hidden');
+        if (dashCreateBtn) dashCreateBtn.classList.add('hidden');
       }
     }
 
-    // Live Peer Activity Simulation Ticker
     const PEER_ACTIVITIES = [
       "សិស្ស ពិសិដ្ឋ (ភ្នំពេញ) ទើបតែឆ្លើយត្រូវ Quiz ៥ សំណួរជាប់គ្នា!",
       "សិស្ស មុន្នី (សៀមរាប) ទើបតែដោះសោពានរង្វាន់មាស (Gold Trophy)!",
@@ -2187,23 +2686,13 @@
       if (t) t.innerText = PEER_ACTIVITIES[tickerIdx];
     }, 9000);
 
-    // Window Onload Initializer
     window.addEventListener('load', () => {
       renderDashboardCourses();
+      renderAdminStudentsList();
       updateAuthUI();
       checkTrophyUnlock();
-
-      // Render KaTeX for initial formulas across page
-      setTimeout(() => {
-        if (typeof renderMathInElement === 'function') {
-          renderMathInElement(document.body, {
-            delimiters: [
-              { left: '$$', right: '$$', display: true },
-              { left: '$', right: '$', display: false }
-            ]
-          });
-        }
-      }, 200);
+      initMathGraphCanvas();
+      triggerKaTeX(document.body);
     });
   </script>
 </body>
